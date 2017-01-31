@@ -15,7 +15,7 @@ We will encourage simpler models that give slightly less accurate predictions bu
 
 ## Exploratory data analysis
 
-```{r}
+```{r, echo=FALSE}
 library(corrplot)
 c2013 <- cor(df2013)
 corrplot(c2013,method="pie",type="lower")
