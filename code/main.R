@@ -11,7 +11,6 @@ figdir = "C:/Users/Thomas/Dropbox/Dropbox/CodingProjects/aerialintel-challenge/f
 df2013 = read.csv(paste(datadir,"wheat-2013-supervised.csv",sep=""),header = TRUE)
 df2014 = read.csv(paste(datadir,"wheat-2014-supervised.csv",sep=""),header = TRUE)
 
-
 StatesList = unique(df2013[2])
 
 # clean the data
@@ -21,10 +20,9 @@ df2014 = df2014[ , !(names(df2014) %in% toDrop)]
 
 # data cleaning
 # look for missing data - using summary
+# only a handful of missing data -> removed
 missing2013 = df2013[!complete.cases(df2013),]
 missing2014 = df2014[!complete.cases(df2014),]
-
-# get ride of these lines 
 df2013 = na.omit(df2013)
 df2014 = na.omit(df2014)
 
@@ -63,6 +61,7 @@ for (i in 1:length(plot_list))
   print(plot_list[[i]])
 }
 dev.off()
+
 
 
 # potential collinearity
@@ -187,57 +186,7 @@ pcrpred <- function(data)
   return(output)
 }
 
-################################### third model - best subset selection ################################### 
-# train and validate the model on year i - test it on year j
-# need for regularization!!
-# k fold cross validation
 
-
-
-library(MASS)
-library(ISLR)
-library(caret)
-library(glmnet)
-library(leaps)
-
-lmsubset <- function(data)
-{
-  nfolds <- 10
-  foldSize = round(nrow(data)/nfolds-1)
-  index = seq(1,nrow(data))
-  index = sample(index)
-  #foldsIndex = split(index, ceiling(seq_along(index)/foldSize))
-  
-  mse = matrix(0,1,10)
-  bestlmat = matrix(0,1,10)
-  
-  x = model.matrix(Yield~.,data)[,-1]
-  y = data$Yield
-  
-  
-  for (i in 1:nfolds)
-  {
-    # select the fold for testing
-    tmpTest = index[(foldSize*(i-1)+1):(foldSize*i)]
-    regfit.full=regsubsets (Yield~.,data = data[-tmpTest,],nvmax=22)
-    
-    if (i == 1){
-      coefMat = coef(cv.out)
-    }else{
-      tempCoef = coef(cv.out)
-      coefMat = cbind(coefMat,tempCoef)
-    }
-    # prediction on the vaidation fold
-    lmsubset.pred = predict(regfit.full,newx = x[tmpTest,])
-    
-    mse[i] = mean((lmsubset.pred-y[tmpTest])^2)
-  }
-  # model is stable?
-  hist(mse,breaks = length(mse),main = "Mean square error")
-  
-  output <- list("mse" = mse, "model" = lasso.model,"coef" = coefMat)
-  return(output)
-}
 
 
 ################################### outliers ################################### 
